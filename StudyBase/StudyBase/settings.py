@@ -213,6 +213,7 @@ DEFAULT_FROM_EMAIL = EMAIL_HOST_USER or 'noreply@studybase.ai'
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
+    "https://study-space-seven.vercel.app",
 ]
 CORS_ALLOW_CREDENTIALS = True
 

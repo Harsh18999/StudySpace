@@ -1,4 +1,4 @@
-FROM python:3.10-slim
+FROM python:3.9-slim
 
 # Install system dependencies: Pandoc, PostgreSQL client libraries, build tools
 RUN apt-get update && apt-get install -y --no-install-recommends \
