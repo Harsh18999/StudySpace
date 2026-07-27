@@ -18,7 +18,6 @@ from spaces.urls import urlpatterns as spaces_urlpatterns
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('keep_alive/', KeepAliveView.as_view(), name='root_keep_alive'),
-    path('keep_alive/<str:name>/', KeepAliveView.as_view(), name='root_keep_alive_with_name'),
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
     path(
         "api/docs/",

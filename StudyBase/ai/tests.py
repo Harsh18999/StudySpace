@@ -26,7 +26,7 @@ class KeepAliveEndpointTests(TestCase):
     @patch("ai.views.keep_alive.dummy_task.delay")
     def test_keep_alive_with_url_name_param(self, mock_delay):
         mock_delay.return_value.id = "mocked-task-id-456"
-        response = self.client.get("/keep_alive/my_service/")
+        response = self.client.get("/keep_alive/?name=my_service")
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["status"], "ok")
         self.assertEqual(response.data["name"], "my_service")

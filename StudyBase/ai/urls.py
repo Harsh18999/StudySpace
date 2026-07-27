@@ -51,7 +51,6 @@ urlpatterns = [
     path("ai/resource-quiz-attempt/save/", SaveResourceQuizAttemptView.as_view(), name="save_resource_quiz_attempt"),
     path("ai/resource-quiz-attempt/<uuid:quiz_id>/", RetrieveResourceQuizAttemptView.as_view(), name="retrieve_resource_quiz_attempt"),
     path("keep_alive/", KeepAliveView.as_view(), name="keep_alive"),
-    path("keep_alive/<str:name>/", KeepAliveView.as_view(), name="keep_alive_with_name"),
 ] + router.urls
 
 
