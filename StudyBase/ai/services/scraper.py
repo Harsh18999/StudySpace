@@ -11,7 +11,7 @@ proxy_config=WebshareProxyConfig(
 
 def fetch_transcript(video_id: str):
     try:
-        api = YouTubeTranscriptApi(proxy_config=proxy_config)
+        api = YouTubeTranscriptApi()
         try:
             transcript = api.fetch(video_id, languages=['en', 'hi'])
         except Exception:
