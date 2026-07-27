@@ -129,10 +129,10 @@ export function GenerateModal({ open, onClose, onSubmit, generating, contentType
                   {/* Credit Cost Badge */}
                   <div className="p-3 bg-amber-50/90 border border-amber-200/80 rounded-xl flex items-center justify-between text-xs">
                     <div className="flex items-center gap-2 text-amber-900 font-bold">
-                      <span className="px-2 py-0.5 rounded-full bg-amber-500 text-white font-black text-[10px]">⚡ 50 CREDITS</span>
-                      <span>Resource Processing</span>
+                      <span className="px-2 py-0.5 rounded-full bg-amber-500 text-white font-black text-[10px]">⚡ 10 CREDITS</span>
+                      <span>AI Generation Cost</span>
                     </div>
-                    <span className="text-[11px] text-amber-700 font-medium">50 Credits / Video</span>
+                    <span className="text-[11px] text-amber-700 font-medium">10 Credits / Item</span>
                   </div>
 
                   {/* Status */}
