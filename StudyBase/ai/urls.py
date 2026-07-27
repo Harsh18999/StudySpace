@@ -20,6 +20,7 @@ from .views import (
     SaveResourceQuizAttemptView,
     RetrieveResourceQuizAttemptView,
     KeepAliveView,
+    ResourceIndexedStatusView,
 )
 from rest_framework.routers import DefaultRouter
 
@@ -36,6 +37,7 @@ router.register(r"module-flashcard", ModuleFlashcardDetailViewSet, basename="mod
 
 urlpatterns = [
     path("ai/generate/", GenerateContent.as_view(), name="generate_content"),
+    path("ai/resource-indexed/", ResourceIndexedStatusView.as_view(), name="resource_indexed_status"),
     path("ai/jobs/<uuid:job_id>/", JobStatusView.as_view(), name="job_status"),
     path("ai/jobs/module/<uuid:job_id>/", ModuleJobStatusView.as_view(), name="module_job_status"),
     path("ai/chat-video/", ChatVideoView.as_view(), name="chat_video"),

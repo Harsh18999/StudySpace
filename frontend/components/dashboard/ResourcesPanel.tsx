@@ -230,6 +230,8 @@ export function ResourcesPanel({
   const [quizModal, setQuizModal] = useState(false);
   const [notesModal, setNotesModal] = useState(false);
   const [flashcardModal, setFlashcardModal] = useState(false);
+  const [indexPromptOpen, setIndexPromptOpen] = useState(false);
+  const [targetGenerateType, setTargetGenerateType] = useState<"Quiz" | "Notes" | "Flashcards" | null>(null);
 
   // Active selected items for highlighting
   const [activeQuizId, setActiveQuizId] = useState<string | null>(null);
@@ -239,6 +241,36 @@ export function ResourcesPanel({
   const quizWorkflow = useWorkflow();
   const notesWorkflow = useWorkflow();
   const flashcardWorkflow = useWorkflow();
+  const indexWorkflow = useWorkflow();
+
+  const handleOpenGenerate = async (type: "Quiz" | "Notes" | "Flashcards") => {
+    try {
+      const { data } = await aiApi.checkResourceIndexed(resource.id);
+      if (!data.is_indexed) {
+        setTargetGenerateType(type);
+        setIndexPromptOpen(true);
+      } else {
+        if (type === "Quiz") setQuizModal(true);
+        if (type === "Notes") setNotesModal(true);
+        if (type === "Flashcards") setFlashcardModal(true);
+      }
+    } catch {
+      setTargetGenerateType(type);
+      setIndexPromptOpen(true);
+    }
+  };
+
+  const handleIndexAndProceed = () => {
+    indexWorkflow.startWorkflow(resource.id, [], () => {
+      setIndexPromptOpen(false);
+      addToast("Resource indexed successfully! ⚡", "success");
+      const target = targetGenerateType;
+      setTargetGenerateType(null);
+      if (target === "Quiz") setQuizModal(true);
+      if (target === "Notes") setNotesModal(true);
+      if (target === "Flashcards") setFlashcardModal(true);
+    });
+  };
 
   // ── Generate handlers ──────────────────────────────────────
   const handleGenerateQuiz = (title: string, instruction: string) => {
@@ -427,6 +459,7 @@ export function ResourcesPanel({
         generating={quizWorkflow.loading}
         contentType="Quiz"
         statusMessage={quizWorkflow.statusMessage}
+        jobId={quizWorkflow.jobId}
         error={quizWorkflow.error}
       />
       <GenerateModal
@@ -436,6 +469,7 @@ export function ResourcesPanel({
         generating={notesWorkflow.loading}
         contentType="Notes"
         statusMessage={notesWorkflow.statusMessage}
+        jobId={notesWorkflow.jobId}
         error={notesWorkflow.error}
       />
       <GenerateModal
@@ -445,8 +479,95 @@ export function ResourcesPanel({
         generating={flashcardWorkflow.loading}
         contentType="Flashcards"
         statusMessage={flashcardWorkflow.statusMessage}
+        jobId={flashcardWorkflow.jobId}
         error={flashcardWorkflow.error}
       />
+
+      {/* Index Prompt Modal */}
+      <AnimatePresence>
+        {indexPromptOpen && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => !indexWorkflow.loading && setIndexPromptOpen(false)}
+              className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.92, y: 24 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.92, y: 24 }}
+              className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-md px-4"
+            >
+              <div className="bg-[#FFFDF9] rounded-2xl shadow-2xl border border-[#E6E0D6] overflow-hidden p-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-600 shadow-xs">
+                    <Sparkles className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-bold text-[#1C1917] heading-font">Indexing Required</h3>
+                    <p className="text-xs text-[#78716C]">Resource content not processed yet</p>
+                  </div>
+                </div>
+
+                <p className="text-xs text-[#78716C] mb-4 leading-relaxed">
+                  Before generating {targetGenerateType ?? "content"}, the video/document needs to be processed and indexed into our AI database.
+                </p>
+
+                <div className="p-3 bg-amber-50 border border-amber-200/80 rounded-xl flex items-center justify-between text-xs mb-5">
+                  <div className="flex items-center gap-2 text-amber-900 font-bold">
+                    <span className="px-2 py-0.5 rounded-full bg-amber-500 text-white font-black text-[10px]">⚡ 50 CREDITS</span>
+                    <span>Processing & Indexing</span>
+                  </div>
+                  <span className="text-[11px] text-amber-700 font-medium">One-time per resource</span>
+                </div>
+
+                {indexWorkflow.loading && (
+                  <div className="p-3 bg-teal-50 border border-teal-200/80 rounded-xl flex items-center justify-between gap-2 text-xs text-[#0D9488] mb-4">
+                    <div className="flex items-center gap-2">
+                      <Loader2 className="w-4 h-4 animate-spin text-[#0D9488] flex-shrink-0" />
+                      <span className="font-semibold">{indexWorkflow.statusMessage ?? "Processing content..."}</span>
+                    </div>
+                    {indexWorkflow.jobId && (
+                      <span className="text-[10px] font-mono opacity-80 bg-teal-100/60 px-2 py-0.5 rounded-md flex-shrink-0">
+                        Job: {indexWorkflow.jobId.slice(0, 8)}
+                      </span>
+                    )}
+                  </div>
+                )}
+
+                {indexWorkflow.error && (
+                  <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-xs text-rose-700 font-medium mb-4">
+                    ⚠️ {indexWorkflow.error}
+                  </div>
+                )}
+
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => setIndexPromptOpen(false)}
+                    disabled={indexWorkflow.loading}
+                    className="flex-1 py-2.5 rounded-xl border border-[#E6E0D6] bg-[#FFFDF9] text-xs font-semibold text-[#78716C] hover:text-[#1C1917] transition-all disabled:opacity-40"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleIndexAndProceed}
+                    disabled={indexWorkflow.loading}
+                    className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-[#0D9488] to-[#059669] text-white text-xs font-bold flex items-center justify-center gap-2 shadow-xs transition-all disabled:opacity-60 heading-font"
+                  >
+                    {indexWorkflow.loading ? (
+                      <><Loader2 className="w-4 h-4 animate-spin" /> Processing…</>
+                    ) : (
+                      <><Sparkles className="w-4 h-4" /> Process & Index (50 Credits ⚡)</>
+                    )}
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
 
       <div className="flex flex-col h-full bg-[#FFFDF9] border-l border-[#E6E0D6]">
         {/* Segmented Control Track */}
@@ -492,18 +613,25 @@ export function ResourcesPanel({
                   icon={<FileQuestion className="w-4 h-4 text-[#0D9488]" />}
                   label="Quizzes"
                   count={resource.quizes?.length ?? 0}
-                  onGenerate={() => setQuizModal(true)}
+                  onGenerate={() => handleOpenGenerate("Quiz")}
                 />
 
                 {quizWorkflow.loading && (
-                  <div className="flex items-center gap-2 p-3 bg-teal-50 border border-teal-200/80 rounded-xl text-xs text-[#0D9488]">
-                    <Loader2 className="w-3.5 h-3.5 animate-spin flex-shrink-0" />
-                    <span>{quizWorkflow.statusMessage ?? "Generating quiz with AI..."}</span>
+                  <div className="flex items-center justify-between gap-2 p-3 bg-teal-50 border border-teal-200/80 rounded-xl text-xs text-[#0D9488]">
+                    <div className="flex items-center gap-2">
+                      <Loader2 className="w-3.5 h-3.5 animate-spin flex-shrink-0" />
+                      <span>{quizWorkflow.statusMessage ?? "Generating quiz with AI..."}</span>
+                    </div>
+                    {quizWorkflow.jobId && (
+                      <span className="text-[10px] font-mono opacity-80 bg-teal-100/60 px-1.5 py-0.5 rounded-md flex-shrink-0">
+                        #{quizWorkflow.jobId.slice(0, 8)}
+                      </span>
+                    )}
                   </div>
                 )}
 
                 {!resource.quizes?.length && !quizWorkflow.loading && (
-                  <EmptyState label="No quizzes generated yet" onGenerate={() => setQuizModal(true)} />
+                  <EmptyState label="No quizzes generated yet" onGenerate={() => handleOpenGenerate("Quiz")} />
                 )}
 
                 {resource.quizes?.map((quiz) => (
@@ -537,18 +665,25 @@ export function ResourcesPanel({
                   icon={<StickyNote className="w-4 h-4 text-[#0D9488]" />}
                   label="Notes"
                   count={resource.notes?.length ?? 0}
-                  onGenerate={() => setNotesModal(true)}
+                  onGenerate={() => handleOpenGenerate("Notes")}
                 />
 
                 {notesWorkflow.loading && (
-                  <div className="flex items-center gap-2 p-3 bg-teal-50 border border-teal-200/80 rounded-xl text-xs text-[#0D9488]">
-                    <Loader2 className="w-3.5 h-3.5 animate-spin flex-shrink-0" />
-                    <span>{notesWorkflow.statusMessage ?? "Generating notes with AI..."}</span>
+                  <div className="flex items-center justify-between gap-2 p-3 bg-teal-50 border border-teal-200/80 rounded-xl text-xs text-[#0D9488]">
+                    <div className="flex items-center gap-2">
+                      <Loader2 className="w-3.5 h-3.5 animate-spin flex-shrink-0" />
+                      <span>{notesWorkflow.statusMessage ?? "Generating notes with AI..."}</span>
+                    </div>
+                    {notesWorkflow.jobId && (
+                      <span className="text-[10px] font-mono opacity-80 bg-teal-100/60 px-1.5 py-0.5 rounded-md flex-shrink-0">
+                        #{notesWorkflow.jobId.slice(0, 8)}
+                      </span>
+                    )}
                   </div>
                 )}
 
                 {!resource.notes?.length && !notesWorkflow.loading && (
-                  <EmptyState label="No smart notes generated yet" onGenerate={() => setNotesModal(true)} />
+                  <EmptyState label="No smart notes generated yet" onGenerate={() => handleOpenGenerate("Notes")} />
                 )}
 
                 {resource.notes?.map((note) => (
@@ -582,18 +717,25 @@ export function ResourcesPanel({
                   icon={<CreditCard className="w-4 h-4 text-[#0D9488]" />}
                   label="Flashcards"
                   count={resource.flashcards?.length ?? 0}
-                  onGenerate={() => setFlashcardModal(true)}
+                  onGenerate={() => handleOpenGenerate("Flashcards")}
                 />
 
                 {flashcardWorkflow.loading && (
-                  <div className="flex items-center gap-2 p-3 bg-teal-50 border border-teal-200/80 rounded-xl text-xs text-[#0D9488]">
-                    <Loader2 className="w-3.5 h-3.5 animate-spin flex-shrink-0" />
-                    <span>{flashcardWorkflow.statusMessage ?? "Generating flashcards with AI..."}</span>
+                  <div className="flex items-center justify-between gap-2 p-3 bg-teal-50 border border-teal-200/80 rounded-xl text-xs text-[#0D9488]">
+                    <div className="flex items-center gap-2">
+                      <Loader2 className="w-3.5 h-3.5 animate-spin flex-shrink-0" />
+                      <span>{flashcardWorkflow.statusMessage ?? "Generating flashcards with AI..."}</span>
+                    </div>
+                    {flashcardWorkflow.jobId && (
+                      <span className="text-[10px] font-mono opacity-80 bg-teal-100/60 px-1.5 py-0.5 rounded-md flex-shrink-0">
+                        #{flashcardWorkflow.jobId.slice(0, 8)}
+                      </span>
+                    )}
                   </div>
                 )}
 
                 {!resource.flashcards?.length && !flashcardWorkflow.loading && (
-                  <EmptyState label="No flashcards generated yet" onGenerate={() => setFlashcardModal(true)} />
+                  <EmptyState label="No flashcards generated yet" onGenerate={() => handleOpenGenerate("Flashcards")} />
                 )}
 
                 {resource.flashcards?.map((fc) => (

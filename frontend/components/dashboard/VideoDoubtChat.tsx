@@ -12,6 +12,7 @@ import {
   HelpCircle,
   MessageSquare,
   AlertCircle,
+  Zap,
 } from "lucide-react";
 import type { Resource } from "@/lib/types";
 import { aiApi } from "@/lib/api";
@@ -302,11 +303,16 @@ export function VideoDoubtChat({ resource }: Props) {
     };
   }, [resource.id]);
 
+  const [indexJobId, setIndexJobId] = useState<string | null>(null);
+  const [indexingMessage, setIndexingMessage] = useState<string | null>(null);
+
   const handleIndexVideo = async () => {
     setIsIndexing(true);
     setError(null);
     try {
       const jobId = typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : String(Date.now());
+      setIndexJobId(jobId);
+      setIndexingMessage("Queued");
       await aiApi.generate(resource.id, [], jobId);
 
       let completed = false;
@@ -314,6 +320,9 @@ export function VideoDoubtChat({ resource }: Props) {
         await new Promise((resolve) => setTimeout(resolve, 3000));
         try {
           const jobRes = await aiApi.jobStatus(jobId);
+          if (jobRes.data?.message) {
+            setIndexingMessage(jobRes.data.message);
+          }
           if (jobRes.data?.status === "completed") {
             completed = true;
             break;
@@ -437,10 +446,14 @@ export function VideoDoubtChat({ resource }: Props) {
             <Sparkles className="w-5 h-5" />
           </div>
           <div>
-            <h3 className="text-base font-bold text-[#1C1917] leading-tight heading-font flex items-center gap-2">
+            <h3 className="text-base font-bold text-[#1C1917] leading-tight heading-font flex flex-wrap items-center gap-2">
               AI Doubt Discussion
               <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-teal-100/70 text-[#0F766E]">
                 Context Aware
+              </span>
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100/90 text-amber-900 border border-amber-300/60 flex items-center gap-1 shadow-2xs">
+                <Zap className="w-3 h-3 text-amber-600 fill-amber-500" />
+                2 Credits / Question
               </span>
             </h3>
             <p className="text-xs text-[#78716C]">Ask doubts, seek explanations, or request timestamp breakdowns.</p>
@@ -475,9 +488,27 @@ export function VideoDoubtChat({ resource }: Props) {
             <h4 className="text-base font-bold text-[#1C1917] heading-font mb-2">
               Video Content Not Processed Yet
             </h4>
-            <p className="text-xs text-[#78716C] mb-6 leading-relaxed">
+            <p className="text-xs text-[#78716C] mb-3 leading-relaxed">
               Before asking AI doubts, this video needs to be processed and indexed into our AI vector database.
             </p>
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-50 border border-amber-200/80 text-amber-900 rounded-full text-xs font-semibold mb-6 shadow-2xs">
+              <Zap className="w-3.5 h-3.5 text-amber-600 fill-amber-500" />
+              <span>Processing Cost: 50 Credits</span>
+            </div>
+
+            {isIndexing && (
+              <div className="mb-4 p-3 bg-teal-50 border border-teal-200/80 rounded-xl flex items-center justify-between text-xs text-[#0D9488] w-full">
+                <div className="flex items-center gap-2">
+                  <RefreshCw className="w-3.5 h-3.5 animate-spin flex-shrink-0" />
+                  <span className="font-semibold">{indexingMessage || "Processing video..."}</span>
+                </div>
+                {indexJobId && (
+                  <span className="font-mono text-[10px] bg-teal-100/60 px-2 py-0.5 rounded">
+                    Job: {indexJobId.slice(0, 8)}
+                  </span>
+                )}
+              </div>
+            )}
 
             <button
               onClick={handleIndexVideo}
@@ -487,12 +518,12 @@ export function VideoDoubtChat({ resource }: Props) {
               {isIndexing ? (
                 <>
                   <RefreshCw className="w-4 h-4 animate-spin" />
-                  <span>Processing & Indexing Video…</span>
+                  <span>Processing Video…</span>
                 </>
               ) : (
                 <>
                   <Sparkles className="w-4 h-4" />
-                  <span>Process Video for AI Doubts</span>
+                  <span>Process Video for AI Doubts (50 Credits ⚡)</span>
                 </>
               )}
             </button>
@@ -505,9 +536,13 @@ export function VideoDoubtChat({ resource }: Props) {
             <h4 className="text-base font-bold text-[#1C1917] heading-font mb-1">
               Have a doubt about this lesson?
             </h4>
-            <p className="text-xs text-[#78716C] max-w-md mb-6 leading-relaxed">
+            <p className="text-xs text-[#78716C] max-w-md mb-2 leading-relaxed">
               Our AI reads this video's transcript and topic details to answer your doubts instantly.
             </p>
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-50 border border-amber-200/80 text-amber-900 rounded-full text-xs font-semibold mb-6 shadow-2xs">
+              <Zap className="w-3.5 h-3.5 text-amber-600 fill-amber-500" />
+              <span>2 Credits per asked question</span>
+            </div>
 
             {/* Quick Suggestion Chips */}
             <div className="w-full max-w-lg flex flex-col gap-2">
@@ -601,7 +636,7 @@ export function VideoDoubtChat({ resource }: Props) {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             disabled={isStreaming}
-            placeholder="Ask any doubt regarding this video lesson…"
+            placeholder="Ask any doubt regarding this video lesson (2 credits)…"
             className="flex-1 bg-[#FFFDF9] border border-[#E6E0D6] focus:border-[#0D9488] focus:ring-2 focus:ring-[#0D9488]/20 rounded-xl px-4 py-3 text-xs md:text-sm text-[#1C1917] placeholder:text-[#A8A29E] outline-none transition-all"
           />
 
@@ -617,6 +652,14 @@ export function VideoDoubtChat({ resource }: Props) {
             )}
           </button>
         </form>
+
+        <div className="flex items-center justify-between text-[11px] text-[#78716C] mt-2 px-1">
+          <span className="text-[10px] text-[#A8A29E]">Press Enter to send</span>
+          <span className="flex items-center gap-1 font-bold text-amber-900 text-[11px] bg-amber-100/80 border border-amber-200/80 px-2 py-0.5 rounded-md shadow-2xs">
+            <Zap className="w-3 h-3 text-amber-600 fill-amber-500" />
+            2 Credits / Question
+          </span>
+        </div>
       </div>
     </div>
   );

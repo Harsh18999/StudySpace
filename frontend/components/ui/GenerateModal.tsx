@@ -10,6 +10,7 @@ interface Props {
   generating: boolean;
   contentType: "Quiz" | "Notes" | "Flashcards";
   statusMessage?: string | null;
+  jobId?: string | null;
   error?: string | null;
 }
 
@@ -25,7 +26,7 @@ const COLORS: Record<string, string> = {
   Flashcards: "from-[#14B8A6] to-[#0F766E]",
 };
 
-export function GenerateModal({ open, onClose, onSubmit, generating, contentType, statusMessage, error }: Props) {
+export function GenerateModal({ open, onClose, onSubmit, generating, contentType, statusMessage, jobId, error }: Props) {
   const [title, setTitle] = useState("");
   const [instruction, setInstruction] = useState("");
 
@@ -128,17 +129,24 @@ export function GenerateModal({ open, onClose, onSubmit, generating, contentType
                   {/* Credit Cost Badge */}
                   <div className="p-3 bg-amber-50/90 border border-amber-200/80 rounded-xl flex items-center justify-between text-xs">
                     <div className="flex items-center gap-2 text-amber-900 font-bold">
-                      <span className="px-2 py-0.5 rounded-full bg-amber-500 text-white font-black text-[10px]">⚡ 10 CREDITS</span>
-                      <span>Resource Generation</span>
+                      <span className="px-2 py-0.5 rounded-full bg-amber-500 text-white font-black text-[10px]">⚡ 50 CREDITS</span>
+                      <span>Resource Processing</span>
                     </div>
-                    <span className="text-[11px] text-amber-700 font-medium">Fixed 10 Credits</span>
+                    <span className="text-[11px] text-amber-700 font-medium">50 Credits / Video</span>
                   </div>
 
                   {/* Status */}
                   {statusMessage && (
-                    <div className="p-3 bg-teal-50 border border-teal-200/80 rounded-xl flex items-center gap-2 text-xs text-[#0D9488]">
-                      <Loader2 className="w-4 h-4 animate-spin text-[#0D9488] flex-shrink-0" />
-                      <span className="font-semibold">{statusMessage}</span>
+                    <div className="p-3 bg-teal-50 border border-teal-200/80 rounded-xl flex items-center justify-between gap-2 text-xs text-[#0D9488]">
+                      <div className="flex items-center gap-2">
+                        <Loader2 className="w-4 h-4 animate-spin text-[#0D9488] flex-shrink-0" />
+                        <span className="font-semibold">{statusMessage}</span>
+                      </div>
+                      {jobId && (
+                        <span className="text-[10px] font-mono opacity-80 bg-teal-100/60 px-2 py-0.5 rounded-md flex-shrink-0">
+                          Job: {jobId.slice(0, 8)}
+                        </span>
+                      )}
                     </div>
                   )}
 

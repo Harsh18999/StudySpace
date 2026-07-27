@@ -15,6 +15,7 @@ const POLL_INTERVAL = 2000;
 
 export function useWorkflow() {
   const [loading, setLoading] = useState(false);
+  const [jobId, setJobId] = useState<string | null>(null);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -37,17 +38,19 @@ export function useWorkflow() {
       setLoading(true);
       setStatusMessage("Starting AI workflow...");
       setError(null);
+      setJobId(null);
 
       aiApi
         .generate(resourceId, instructions)
         .then((res) => {
-          const jobId: string = res.data.job_id;
+          const fetchedJobId: string = res.data.job_id;
+          setJobId(fetchedJobId);
           setStatusMessage("Queued");
 
           // Poll the job status endpoint every POLL_INTERVAL ms
           intervalRef.current = setInterval(async () => {
             try {
-              const { data } = await aiApi.jobStatus(jobId);
+              const { data } = await aiApi.jobStatus(fetchedJobId);
 
               // Always reflect the latest workflow status message
               if (data.message) {
@@ -102,6 +105,7 @@ export function useWorkflow() {
 
   return {
     loading,
+    jobId,
     statusMessage,
     error,
     startWorkflow,

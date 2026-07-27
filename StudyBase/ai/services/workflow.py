@@ -184,7 +184,20 @@ def summarize_chunks(state: State):
     return {"summarise": [summary.content]}
 
 
+from accounts.models import CreditWallet
+from payments.models import CreditUsage
+
+
 def save_summaries(state: State):
+    user = state["resource"].module.space.user
+    credit_wallet, _ = CreditWallet.objects.get_or_create(user=user, defaults={"balance": 0})
+    if credit_wallet.debit(50):
+        CreditUsage.objects.create(
+            wallet=credit_wallet,
+            amount=50,
+            transaction_type="debit",
+            description=f"Debited 50 credits for processing & indexing content for resource '{state['resource'].id}'",
+        )
 
     if state["resource"].type == 'youtube':        
         docs = [Document(

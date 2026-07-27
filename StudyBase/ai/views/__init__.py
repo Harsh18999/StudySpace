@@ -3,6 +3,7 @@ from .jobs import (
     JobStatusView,
     ModuleJobStatusView,
     FetchPendingJobsView,
+    ResourceIndexedStatusView,
 )
 from .quizzes import (
     QuizesViewSet,

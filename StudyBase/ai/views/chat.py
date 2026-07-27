@@ -16,6 +16,9 @@ from ai.models import VideoChatSession, IndexVideos, IndexPDFs
 from ai.serializers import ChatVideoSerializer
 from langgraph.checkpoint.postgres import PostgresSaver
 from ai.services.chat import build_graph
+from accounts.models import CreditWallet
+from payments.models import CreditUsage
+from payments.utils import check_user_has_credits
 
 
 class ChatVideoView(APIView):
@@ -25,6 +28,18 @@ class ChatVideoView(APIView):
     def post(self, request):
         serializer = ChatVideoSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
+
+        has_credits, balance = check_user_has_credits(request.user, 2)
+        if not has_credits:
+            return Response(
+                {
+                    "message": "Insufficient credits",
+                    "detail": f"Insufficient credits. Video chat requires 2 credits per question, but your current balance is {balance} credits.",
+                    "required_credits": 2,
+                    "current_balance": balance,
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         resource_id = serializer.validated_data["resource_id"]
         try:
@@ -64,6 +79,16 @@ class ChatVideoView(APIView):
                 ):
                     if metadata.get("langgraph_node") == "chat" and getattr(message, "content", None):
                         yield message.content.encode("utf-8")
+                
+                wallet, _ = CreditWallet.objects.get_or_create(user=request.user)
+                if wallet.debit(2):
+                    CreditUsage.objects.create(
+                        wallet=wallet,
+                        amount=2,
+                        transaction_type="debit",
+                        description="Debited 2 credits for Video Chat response",
+                    )
+
 
         return StreamingHttpResponse(
             generate(),

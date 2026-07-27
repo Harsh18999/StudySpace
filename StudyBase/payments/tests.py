@@ -113,7 +113,7 @@ class PaymentsTestCase(TestCase):
         response = self.client.post("/api/ai/generate/", payload, format="json")
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.data["message"], "Insufficient credits")
-        self.assertEqual(response.data["required_credits"], 10)
+        self.assertEqual(response.data["required_credits"], 60)
         self.assertEqual(response.data["current_balance"], 5)
 
     def test_post_save_debit_signals(self):

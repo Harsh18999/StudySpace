@@ -112,7 +112,8 @@ export const aiApi = {
   renameFlashcard: (flashcard_id: string, title: string) => api.patch(`/api/flashcards/${flashcard_id}/`, { title }),
   deleteFlashcard: (flashcard_id: string) => api.delete(`/api/flashcards/${flashcard_id}/`),
 
-  // ── Video AI Doubt Chat ──
+  // ── Video AI Doubt Chat & Resource Index Status ──
+  checkResourceIndexed: (resource_id: string) => api.get("/api/ai/resource-indexed/", { params: { resource_id } }),
   getVideoChatHistory: (resource_id: string) => api.get("/api/ai/chat-video/", { params: { resource_id } }),
   deleteVideoChatSession: (resource_id: string) => api.delete("/api/ai/chat-video/", { params: { resource_id } }),
 };

@@ -5,7 +5,7 @@ def calculate_resource_credit_cost(instructions: list) -> int:
     10 credits per requested resource instruction (quiz, note, flashcard).
     """
     if not instructions:
-        return 10
+        return 0
     return len(instructions) * 10
 
 
