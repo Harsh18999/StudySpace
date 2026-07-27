@@ -6,7 +6,17 @@ def calculate_resource_credit_cost(instructions: list) -> int:
     """
     if not instructions:
         return 0
-    return len(instructions) * 10
+    credits = 0
+
+    for instruction in instructions:
+        if instruction.get("type") == "flashcard":
+            credits += 10
+        elif instruction.get("type") == "quiz":
+            credits += 10
+        elif instruction.get("type") == "notes":
+            credits += 15
+    
+    return credits
 
 
 def calculate_module_credit_cost(resource_count: int, item_count: int) -> int:

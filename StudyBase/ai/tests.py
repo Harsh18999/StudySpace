@@ -155,7 +155,7 @@ class ResourceIndexedStatusTests(TestCase):
         IndexVideos.objects.create(
             video_id="vid_test_xyz",
             collection_name="test_collection",
-            tanscript=[],
+            transcript=[],
         )
 
         res = self.client.get(f"/api/ai/resource-indexed/?resource_id={self.resource.id}")

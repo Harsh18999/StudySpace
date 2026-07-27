@@ -9,7 +9,7 @@ def fetch_transcript(video_id: str, lang: str = 'es'):
     try:
         indexed_video = IndexVideos.objects.filter(video_id=video_id).first()
         if indexed_video:
-            existing_transcript = getattr(indexed_video, 'tanscript', None) or getattr(indexed_video, 'transcript', None)
+            existing_transcript = getattr(indexed_video, 'transcript', None) or getattr(indexed_video, 'transcript', None)
             if existing_transcript:
                 return existing_transcript
     except Exception:

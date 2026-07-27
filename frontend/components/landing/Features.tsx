@@ -105,7 +105,7 @@ export function Features() {
               </div>
               <h3 className="text-lg font-bold text-[#1C1917] font-['Plus_Jakarta_Sans']">📝 AI Structured Notes</h3>
               <p className="text-xs text-[#78716C] leading-relaxed">
-                Automatic markdown notes with clear heading hierarchies, bullet summaries, and mathematical formulas (starts from 10 credits).
+                Automatic markdown notes with clear heading hierarchies, bullet summaries, and mathematical formulas (starts from 15 credits).
               </p>
             </div>
 

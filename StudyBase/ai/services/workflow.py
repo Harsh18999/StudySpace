@@ -7,10 +7,10 @@ except ImportError:  # Python < 3.11
 import uuid
 from pathlib import Path
 
-from .scraper import fetch_transcript, fetch_file
+from .scraper import fetch_transcript as fetch_transcript_from_scraper, fetch_file
 from ai.models import IndexPDFs, IndexVideos, FlashCards, ResourseQuizes, Notes
 from spaces.models import Resource, Files
-from .prompts import summarize_prompt, notes_generation_prompt, flashcard_generation_prompt, quiz_generation_prompt
+from .prompts import summarize_prompt, final_summary_prompt, notes_generation_prompt, flashcard_generation_prompt, quiz_generation_prompt
 from .schema import *
 
 from .s3 import s3
@@ -53,6 +53,7 @@ class State(TypedDict):
     transcript: NotRequired[list[dict]]
     text_content: NotRequired[str]
     summarise: Annotated[list[str], operator.add]   # Fix #2: Annotated, not NotRequired[..., operator.add]
+    final_summary: NotRequired[str]
     chunks: NotRequired[list[str]]
     notes: NotRequired[str]
     notes_title: NotRequired[str]
@@ -63,27 +64,33 @@ class State(TypedDict):
     status: NotRequired[str]
     
 
-model = init_chat_model(
-    model='gpt-4.1',            # Fix #3: was 'gpt-4', now consistent with MODEL constant
-    model_provider='openai',
-    temperature=0
-
-)
 summary_model = init_chat_model(
-    model='gpt-4.1-mini',            # Fix #3: was 'gpt-4', now consistent with MODEL constant
+    model='gpt-5.4-nano',
     model_provider='openai',
     temperature=0
 )
 
-flashcard_generation_model = model.with_structured_output(FlashcardSet)
-quiz_generation_model = model.with_structured_output(Quiz)
+final_summary_model = init_chat_model(
+    model='gpt-5.4-mini',            
+    model_provider='openai',
+    temperature=0
+)
+
+generation_model = init_chat_model(
+    model='gpt-5.4-mini',            
+    model_provider='openai',
+    temperature=0
+)
+
+flashcard_generation_model = generation_model.with_structured_output(FlashcardSet)
+quiz_generation_model = generation_model.with_structured_output(Quiz)
 
 def init(state: State):
     return {'status': 'Processing content'}
 
 def fetch_content(state: State):
     if state["resource"].type == 'youtube':      # Fix #4 & #7: use .type, correct lowercase value
-        transcript = fetch_transcript(state["resource"].youtube_video.video_id)  # Fix #4
+        transcript = fetch_transcript_from_scraper(state["resource"].youtube_video.video_id)  # Fix #4
         return {'transcript': transcript}
 
     with TemporaryDirectory() as temp_dir:
@@ -98,6 +105,13 @@ def fetch_content(state: State):
         
         return {'text_content': content}
 
+def fetch_transcript(state: State):
+    indexed = IndexVideos.objects.filter(video_id=state["resource"].youtube_video.video_id).first()
+    transcript = (getattr(indexed, 'transcript', None) if indexed else None) or (getattr(indexed, 'transcript', None) if indexed else None)
+    if not transcript:
+        transcript = fetch_transcript_from_scraper(state["resource"].youtube_video.video_id)
+    return {'transcript': transcript}
+    
 def process_transcript(state: State):
     content = "\n".join([str(item["text"]) for item in state["transcript"]])
     docs = splitter.split_documents([Document(page_content=content, metadata={   # Fix #5: splitter now imported
@@ -111,11 +125,17 @@ def process_transcript(state: State):
         batch = docs[i:i+batch_size]
         video_vector_store.add_documents(batch)   # Fix #5: video_vector_store now imported
     
-    IndexVideos.objects.create(
-        video_id=state["resource"].youtube_video.video_id,
-        collection_name="video_embeddings",
-        tanscript=state["transcript"]
-    )
+    indexed = IndexVideos.objects.filter(video_id=state["resource"].youtube_video.video_id).first()
+    if indexed:
+        indexed.collection_name = "video_embeddings"
+        indexed.transcript = state["transcript"]
+        indexed.save()
+    else:
+        IndexVideos.objects.create(
+            video_id=state["resource"].youtube_video.video_id,
+            collection_name="video_embeddings",
+            transcript=state["transcript"]
+        )
     return {'status': 'Summarising content'}
 
 def process_pdf(state: State):
@@ -131,15 +151,20 @@ def process_pdf(state: State):
         pdf_vector_store.add_documents(batch)   # Fix #5: pdf_vector_store now imported
     
     file = Files.objects.get(file_id=state["resource"].pdf_file.file_id)
-    IndexPDFs.objects.create(
-        file=file,
-        collection_name="pdf_embeddings",
-    )
+    indexed = IndexPDFs.objects.filter(file=file).first()
+    if indexed:
+        indexed.collection_name = "pdf_embeddings"
+        indexed.save()
+    else:
+        IndexPDFs.objects.create(
+            file=file,
+            collection_name="pdf_embeddings",
+        )
     return {"status": "Summarising content"}
 
 def send_content(state: State):
 
-    batch_size = 10
+    batch_size = 15
 
     if state["resource"].type == 'youtube':         # Fix #6: use resource.type, correct lowercase
         result = video_vector_store.get(
@@ -179,7 +204,8 @@ def send_content(state: State):
 
 def summarize_chunks(state: State):
     summary = summary_model.invoke(
-        summarize_prompt.format(content="\n".join([chunk.page_content for chunk in state['chunks']]))
+        summarize_prompt.format(content="\n".join([chunk.page_content for chunk in state['chunks']])), 
+        max_tokens=1000
     )
     return {"summarise": [summary.content]}
 
@@ -187,8 +213,20 @@ def summarize_chunks(state: State):
 from accounts.models import CreditWallet
 from payments.models import CreditUsage
 
+def final_summary(state: State):
+    summary = final_summary_model.invoke(final_summary_prompt.format(content="\n".join(state['summarise'])), max_tokens=3000)
+    
+    if state["resource"].type == 'youtube':
+        indexed = IndexVideos.objects.filter(video_id=state["resource"].youtube_video.video_id).first()
+        if indexed:
+            indexed.final_summary = summary.content
+            indexed.save()
+    else:
+        indexed = IndexPDFs.objects.filter(file__file_id=state["resource"].pdf_file.file_id).first()
+        if indexed:
+            indexed.final_summary = summary.content
+            indexed.save()
 
-def save_summaries(state: State):
     user = state["resource"].module.space.user
     credit_wallet, _ = CreditWallet.objects.get_or_create(user=user, defaults={"balance": 0})
     if credit_wallet.debit(50):
@@ -199,61 +237,18 @@ def save_summaries(state: State):
             description=f"Debited 50 credits for processing & indexing content for resource '{state['resource'].id}'",
         )
 
-    if state["resource"].type == 'youtube':        
-        docs = [Document(
-            page_content=summary,
-            metadata={
-                "video_id": state["resource"].youtube_video.video_id,
-                "type": "youtube",
-                "content_type": "summaries"
-            }
-        ) for summary in state['summarise']]
-        video_vector_store.add_documents(docs)
+    return {"final_summary": summary.content, "status": "Processing complete"}
     
+def fetch_final_summary(state: State):
+    if state["resource"].type == 'youtube':
+        indexed = IndexVideos.objects.filter(video_id=state["resource"].youtube_video.video_id).first()
     else:
-        docs = [Document(
-            page_content=summary,
-            metadata={
-                "pdf_id": str(state["resource"].pdf_file.file_id),
-                "type": "pdf",
-                "content_type": "summaries"
-            }
-        ) for summary in state['summarise']]
-        pdf_vector_store.add_documents(docs)
+        indexed = IndexPDFs.objects.filter(file__file_id=state["resource"].pdf_file.file_id).first()
     
-    status = f"Generating {', '.join([instruction['type'] for instruction in state['instructions']])}"
-    return {"status": status}
-
-def fetch_summarise(state: State):
-
-    if state['resource'].type == "youtube":
-        result = video_vector_store.get(
-            ids = None,
-            where = {
-                "video_id": state["resource"].youtube_video.video_id,
-                "type": "youtube",
-                "content_type": "summaries"
-            }
-        )
-        status = f"Generating {', '.join([instruction['type'] for instruction in state['instructions']])}"
-        return {"summarise": result.get("documents", []), "status": status}
-
-    else:
-        result = pdf_vector_store.get(
-            ids = None,
-            where = {
-                "pdf_id": str(state["resource"].pdf_file.file_id),
-                "type": "pdf",
-                "content_type": "summaries"
-            }
-        )
-        return {"summarise": result.get("documents", [])}
+    final_summary_text = indexed.final_summary if (indexed and indexed.final_summary) else ""
+    return {"final_summary": final_summary_text}
 
 def generate_notes(state: State):
-    merged_summaries = "\n".join(state["summarise"])
-    tokens = encoding.encode(merged_summaries)
-    token_count = len(tokens)
-
     instruction_text = ''
     instruction_title = 'Study Notes'
 
@@ -263,11 +258,8 @@ def generate_notes(state: State):
             instruction_title = inst.get('title', 'Study Notes')
             break
 
-    if token_count > TARGET_INPUT:
-        raise ValueError("Content is too long")
-    
-    response = model.invoke(
-        notes_generation_prompt.format(summary=merged_summaries, instruction=instruction_text)
+    response = generation_model.invoke(
+        notes_generation_prompt.format(summary=state['final_summary'], instruction=instruction_text)
     )
     return {"notes": response.content, "notes_title": instruction_title}
 
@@ -318,8 +310,7 @@ def export_notes(state: State):
         
     
 def generate_flashcards(state: State):
-    merged_summaries = "\n".join(state["summarise"])
-    
+
     instruction_text = ''
     instruction_title = 'Flashcards'
 
@@ -329,14 +320,8 @@ def generate_flashcards(state: State):
             instruction_title = inst.get('title', 'Flashcards')
             break
 
-    tokens = encoding.encode(merged_summaries)
-    token_count = len(tokens)
-
-    if token_count > TARGET_INPUT:
-        raise ValueError("Content is too long")
-    
     flashcards = flashcard_generation_model.invoke(
-        flashcard_generation_prompt.format(summary=merged_summaries, instruction=instruction_text)    # Fix #10: prompt now imported
+        flashcard_generation_prompt.format(summary=state['final_summary'], instruction=instruction_text)    # Fix #10: prompt now imported
     )
 
     FlashCards.objects.create(
@@ -348,8 +333,6 @@ def generate_flashcards(state: State):
     return {"flashcards": flashcards}
 
 def generate_quizes(state: State):
-    merged_summaries = "\n".join(state["summarise"])
-    
     instruction_text = ''
     instruction_title = 'Quiz'
 
@@ -358,15 +341,9 @@ def generate_quizes(state: State):
             instruction_text = inst.get('text', '')
             instruction_title = inst.get('title', 'Quiz')
             break
-
-    tokens = encoding.encode(merged_summaries)
-    token_count = len(tokens)
-
-    if token_count > TARGET_INPUT:
-        raise ValueError("Content is too long")
     
     quizes = quiz_generation_model.invoke(
-        quiz_generation_prompt.format(summary=merged_summaries, instruction=instruction_text)         # Fix #10: prompt now imported
+        quiz_generation_prompt.format(summary=state['final_summary'], instruction=instruction_text)         # Fix #10: prompt now imported
     )
 
     ResourseQuizes.objects.create(
@@ -382,11 +359,15 @@ def combine_content(state: State):
 
 def check_indexing(state: State):
     if state['resource'].type == 'youtube':
-        if IndexVideos.objects.filter(video_id=state["resource"].youtube_video.video_id).exists():
-            return 'fetch_summarise'
+        indexed = IndexVideos.objects.filter(video_id=state["resource"].youtube_video.video_id).first()
+        if indexed:
+            if not indexed.transcript:
+                return 'fetch_transcript'
+            return 'fetch_final_summary'
     else:
-        if IndexPDFs.objects.filter(file__file_id=state["resource"].pdf_file.file_id).exists():
-            return 'fetch_summarise'
+        indexed = IndexPDFs.objects.filter(file__file_id=state["resource"].pdf_file.file_id).first()
+        if indexed:
+            return 'fetch_final_summary'
 
     return 'fetch_content'
 
@@ -405,19 +386,19 @@ def generate_content(state: State):
     for instruction in state['instructions']:
         if instruction['type'] == 'quize':
             opr.append(Send("generate_quizes", {
-                'summarise': state['summarise'],
+                'final_summary': state['final_summary'],
                 'resource': state['resource'],
                 'instructions': state['instructions']
             }))
         if instruction['type'] == 'notes':
             opr.append(Send("generate_notes", {
-                'summarise': state['summarise'],
+                'final_summary': state['final_summary'],
                 'resource': state['resource'],
                 'instructions': state['instructions']
             }))
         if instruction['type'] == 'flashcard':
             opr.append(Send("generate_flashcards", {
-                'summarise': state['summarise'],
+                'final_summary': state['final_summary'],
                 'resource': state['resource'],
                 'instructions': state['instructions']
             }))
@@ -428,11 +409,12 @@ def build_state_graph():
     builder = StateGraph(State)
     builder.add_node("init", init)
     builder.add_node("fetch_content", fetch_content)
+    builder.add_node("fetch_transcript", fetch_transcript)
     builder.add_node("process_transcript", process_transcript)
     builder.add_node("process_pdf", process_pdf)
     builder.add_node("summarize_chunks", summarize_chunks)
-    builder.add_node("save_summaries", save_summaries)
-    builder.add_node("fetch_summarise", fetch_summarise)
+    builder.add_node("final_summary", final_summary)
+    builder.add_node("fetch_final_summary", fetch_final_summary)
     builder.add_node("generate_notes", generate_notes)
     builder.add_node("export_notes", export_notes)
     builder.add_node("generate_flashcards", generate_flashcards)
@@ -445,7 +427,8 @@ def build_state_graph():
         check_indexing, 
         {
             'fetch_content': 'fetch_content',
-            'fetch_summarise': 'fetch_summarise'
+            'fetch_final_summary': 'fetch_final_summary',
+            'fetch_transcript': 'fetch_transcript'
         }
     )
     builder.add_conditional_edges(
@@ -456,12 +439,13 @@ def build_state_graph():
             "process_pdf": "process_pdf"
         }
     )
-
+    
+    builder.add_edge('fetch_transcript', 'process_transcript')
     builder.add_conditional_edges('process_transcript', send_content)
     builder.add_conditional_edges('process_pdf', send_content)
-    builder.add_edge('summarize_chunks', 'save_summaries')
-    builder.add_conditional_edges('save_summaries', generate_content)
-    builder.add_conditional_edges('fetch_summarise', generate_content)
+    builder.add_edge('summarize_chunks', 'final_summary')
+    builder.add_conditional_edges('final_summary', generate_content)
+    builder.add_conditional_edges('fetch_final_summary', generate_content)
     builder.add_edge('generate_notes', 'export_notes')
     builder.add_edge('export_notes', 'combine_content')
     builder.add_edge('generate_flashcards', 'combine_content')

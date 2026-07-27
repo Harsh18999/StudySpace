@@ -276,7 +276,7 @@ def update_notes(sender, instance, created, **kwargs):
         user = instance.resource.module.space.user 
         report_tags, _ = ReportTags.objects.get_or_create(user=user)
         
-        cost = 10
+        cost = 15
         credit_wallet, _ = CreditWallet.objects.get_or_create(user=user, defaults={"balance": 0})
         credit_wallet.debit(cost)
         CreditUsage.objects.create(

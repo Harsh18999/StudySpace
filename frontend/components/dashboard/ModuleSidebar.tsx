@@ -196,14 +196,19 @@ export function ModuleSidebar({ spaceId, space, onSelectResource }: Props) {
         addToast("Playlist added!", "success");
       } else {
         await resourcesApi.addVideo(videoUrl.trim(), moduleId);
-        addToast("Video added!", "success");
+        addToast("Video added successfully!", "success");
       }
       const { data } = await modulesApi.retrieve(moduleId);
       setModuleDetails((prev) => ({ ...prev, [moduleId]: data }));
       setVideoUrl("");
       setShowAddVideo(null);
-    } catch {
-      addToast("Failed to add video. Check the URL.", "error");
+    } catch (err: any) {
+      const errMsg =
+        err?.response?.data?.non_field_errors?.[0] ||
+        err?.response?.data?.detail ||
+        err?.response?.data?.error ||
+        "Failed to add video. Check the URL.";
+      addToast(errMsg, "error");
     } finally {
       setAddingVideo(false);
     }

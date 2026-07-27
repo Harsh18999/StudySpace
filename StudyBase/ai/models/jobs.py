@@ -6,7 +6,8 @@ import uuid
 class IndexVideos(models.Model):
     video_id = models.CharField(max_length=100)
     collection_name = models.CharField(max_length=100)
-    tanscript = models.JSONField()
+    transcript = models.JSONField()
+    final_summary = models.TextField(null=True, blank=True)
     indexed_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -16,6 +17,7 @@ class IndexVideos(models.Model):
 class IndexPDFs(models.Model):
     file = models.ForeignKey(Files, on_delete=models.CASCADE)
     collection_name = models.CharField(max_length=100)
+    final_summary = models.TextField(null=True, blank=True)
     indexed_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

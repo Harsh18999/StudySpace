@@ -1,113 +1,28 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import Link from "next/link";
-import { Check, Sparkles, Coins, ArrowRight, Bot, FileText, HelpCircle, Brain } from "lucide-react";
+import { Coins, ArrowRight, Bot, FileText, HelpCircle, Brain, Video, Sparkles, CheckCircle2 } from "lucide-react";
 
 export function Pricing() {
-  const [isYearly, setIsYearly] = useState(false);
-
-  const plans = [
-    {
-      name: "Free",
-      priceMonthly: "₹0",
-      priceYearly: "₹0",
-      period: "forever",
-      desc: "Perfect for exploring AI notes and trying out StudySpace.AI.",
-      credits: "500 Credits / mo",
-      popular: false,
-      buttonText: "Start Free (500 Credits)",
-      buttonHref: "/auth",
-      features: [
-        "500 Free Monthly Credits",
-        "1 ₹ = 10 Credits Rate",
-        "AI Chat starts at 1 credit / msg",
-        "Notes/Quiz/Flashcards: 10 credits",
-        "3 Course Workspaces",
-        "Export to DOCX Document"
-      ]
-    },
-    {
-      name: "Pro ⭐",
-      priceMonthly: "₹199",
-      priceYearly: "₹159",
-      period: "per month",
-      desc: "Ideal for active university students and competitive exam prep.",
-      credits: "3,000 Credits / mo",
-      popular: true,
-      buttonText: "Get 3,000 Credits",
-      buttonHref: "/auth?plan=pro",
-      features: [
-        "3,000 Monthly Credits",
-        "Equivalent to 3,000 AI Chat Queries",
-        "OR 300 Full Note/Quiz/Flashcard Sets",
-        "Unlimited Course Workspaces",
-        "High-Speed AI RAG Indexing",
-        "Spaced Repetition Flashcards",
-        "Full Learning Streak Analytics",
-        "Export to DOCX Document"
-      ]
-    },
-    {
-      name: "Power Learner",
-      priceMonthly: "₹499",
-      priceYearly: "₹399",
-      period: "per month",
-      desc: "For heavy academic workloads, research papers, and GATE/UPSC prep.",
-      credits: "10,000 Credits / mo",
-      popular: false,
-      buttonText: "Get 10,000 Credits",
-      buttonHref: "/auth?plan=premium",
-      features: [
-        "10,000 Monthly Credits",
-        "Equivalent to 10,000 AI Chat Queries",
-        "OR 1,000 Full AI Asset Generations",
-        "Priority AI Processing Pipeline",
-        "Unlimited Storage & Workspaces",
-        "Access to Upcoming Features",
-        "Dedicated Email Support",
-        "Export to DOCX Document"
-      ]
-    }
-  ];
-
   return (
-    <section id="pricing" className="py-20 md:py-32 bg-[#FAF7F2] relative">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-16">
+    <section id="pricing" className="py-20 md:py-28 bg-[#FAF7F2] relative">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
         
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto space-y-4">
           <span className="text-xs font-bold uppercase tracking-wider text-[#0D9488] bg-[#0D9488]/10 px-3 py-1 rounded-full border border-[#0D9488]/20">
-            Simple Credit-Based Pricing
+            Simple & Transparent
           </span>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-[#1C1917] font-['Plus_Jakarta_Sans']">
-            Pay Only for What You Use
+            500 Free Credits On Signup
           </h2>
           <p className="text-base sm:text-lg text-[#78716C]">
-            Start with <strong>500 free monthly credits</strong>. Refill credits at an unbeatable rate of <strong>1 ₹ = 10 Credits</strong>.
+            No monthly subscription commitments. Start free with <strong>500 credits on signup</strong>, and refill anytime at <strong>1 ₹ = 10 Base Credits</strong>.
           </p>
-
-          {/* Monthly / Yearly Toggle */}
-          <div className="pt-4 flex items-center justify-center gap-3">
-            <span className={`text-xs font-semibold ${!isYearly ? "text-[#1C1917]" : "text-[#78716C]"}`}>Monthly</span>
-            <button
-              onClick={() => setIsYearly(!isYearly)}
-              className="w-12 h-6 rounded-full bg-[#E6E0D6] p-1 transition-colors relative flex items-center"
-            >
-              <div
-                className={`w-4 h-4 rounded-full bg-[#0D9488] transition-transform ${
-                  isYearly ? "translate-x-6" : "translate-x-0"
-                }`}
-              />
-            </button>
-            <span className={`text-xs font-semibold flex items-center gap-1 ${isYearly ? "text-[#1C1917]" : "text-[#78716C]"}`}>
-              <span>Yearly</span>
-              <span className="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">Save 20%</span>
-            </span>
-          </div>
         </div>
 
-        {/* ── Credit System Breakdown Banner ── */}
+        {/* ── Credit Consumption Breakdown Banner ── */}
         <div className="p-6 sm:p-8 rounded-3xl bg-gradient-to-r from-[#0D9488]/10 via-[#2563EB]/10 to-[#7C3AED]/10 border border-[#0D9488]/30 max-w-5xl mx-auto space-y-6">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-[#0D9488]/20 pb-4">
             <div className="flex items-center gap-3">
@@ -115,34 +30,37 @@ export function Pricing() {
                 <Coins className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="font-bold text-lg text-[#1C1917] font-['Plus_Jakarta_Sans']">How Credits Work</h3>
-                <p className="text-xs text-[#78716C]">Simple, transparent consumption rate for all AI operations</p>
+                <h3 className="font-bold text-lg text-[#1C1917] font-['Plus_Jakarta_Sans']">Credit Cost Breakdown</h3>
+                <p className="text-xs text-[#78716C]">Transparent usage rate per feature</p>
               </div>
             </div>
             <div className="bg-[#FFFDF9] px-4 py-2 rounded-2xl border border-[#0D9488]/30 text-xs font-bold text-[#0D9488] shadow-sm">
-              1 ₹ = 10 Credits
+              1 ₹ = 10 Base Credits
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 text-xs">
+            {/* Video Processing */}
             <div className="p-4 rounded-2xl bg-white border border-[#E6E0D6] space-y-1">
               <div className="flex items-center gap-2 font-bold text-[#1C1917]">
-                <Bot className="w-4 h-4 text-[#0D9488]" />
-                <span>AI Tutor Chat</span>
+                <Video className="w-4 h-4 text-amber-600" />
+                <span>Process Video</span>
               </div>
-              <p className="text-sm font-extrabold text-[#0D9488]">1 Credit</p>
-              <p className="text-[11px] text-[#78716C]">Per query message</p>
+              <p className="text-sm font-extrabold text-[#0D9488]">50 Credits</p>
+              <p className="text-[11px] text-[#78716C]">Videos up to 2 hours duration</p>
             </div>
 
+            {/* AI Notes */}
             <div className="p-4 rounded-2xl bg-white border border-[#E6E0D6] space-y-1">
               <div className="flex items-center gap-2 font-bold text-[#1C1917]">
                 <FileText className="w-4 h-4 text-emerald-600" />
                 <span>AI Notes</span>
               </div>
-              <p className="text-sm font-extrabold text-[#0D9488]">10 Credits</p>
-              <p className="text-[11px] text-[#78716C]">Per resource generated</p>
+              <p className="text-sm font-extrabold text-[#0D9488]">15 Credits</p>
+              <p className="text-[11px] text-[#78716C]">Per note generation</p>
             </div>
 
+            {/* AI Quiz Bank */}
             <div className="p-4 rounded-2xl bg-white border border-[#E6E0D6] space-y-1">
               <div className="flex items-center gap-2 font-bold text-[#1C1917]">
                 <HelpCircle className="w-4 h-4 text-blue-600" />
@@ -152,81 +70,63 @@ export function Pricing() {
               <p className="text-[11px] text-[#78716C]">Per 10 MCQ set</p>
             </div>
 
+            {/* Smart Flashcards */}
             <div className="p-4 rounded-2xl bg-white border border-[#E6E0D6] space-y-1">
               <div className="flex items-center gap-2 font-bold text-[#1C1917]">
                 <Brain className="w-4 h-4 text-purple-600" />
-                <span>Smart Flashcards</span>
+                <span>Flashcards</span>
               </div>
               <p className="text-sm font-extrabold text-[#0D9488]">10 Credits</p>
               <p className="text-[11px] text-[#78716C]">Per flashcard deck</p>
             </div>
+
+            {/* AI Tutor Chat */}
+            <div className="p-4 rounded-2xl bg-white border border-[#E6E0D6] space-y-1">
+              <div className="flex items-center gap-2 font-bold text-[#1C1917]">
+                <Bot className="w-4 h-4 text-[#0D9488]" />
+                <span>AI Tutor Chat</span>
+              </div>
+              <p className="text-sm font-extrabold text-[#0D9488]">1 Credit</p>
+              <p className="text-[11px] text-[#78716C]">Per query message</p>
+            </div>
           </div>
         </div>
 
-        {/* ── 3 Pricing Cards Grid ── */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch">
-          {plans.map((plan, idx) => {
-            const price = isYearly ? plan.priceYearly : plan.priceMonthly;
+        {/* ── Start Free Banner ── */}
+        <div className="max-w-3xl mx-auto p-8 rounded-3xl bg-[#FFFDF9] border border-[#E6E0D6] shadow-sm text-center space-y-6">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold">
+            <Sparkles className="w-3.5 h-3.5" /> Instant Account Access
+          </div>
+          <div className="space-y-2">
+            <h3 className="text-2xl sm:text-3xl font-extrabold text-[#1C1917] font-['Plus_Jakarta_Sans']">
+              Claim Your 500 Free Credits
+            </h3>
+            <p className="text-sm text-[#78716C]">
+              Create an account now and start processing lecture videos, generating study notes, flashcards, and quizzes immediately.
+            </p>
+          </div>
 
-            return (
-              <div
-                key={idx}
-                className={`relative rounded-3xl p-8 flex flex-col justify-between transition-all duration-200 ${
-                  plan.popular
-                    ? "bg-[#FFFDF9] border-2 border-[#0D9488] shadow-2xl scale-105 z-10"
-                    : "bg-[#FFFDF9] border border-[#E6E0D6] shadow-sm hover:shadow-md"
-                }`}
-              >
-                {plan.popular && (
-                  <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-gradient-to-r from-[#0D9488] to-[#2563EB] text-white text-xs font-bold uppercase tracking-wider px-4 py-1 rounded-full shadow-md flex items-center gap-1.5">
-                    <Sparkles className="w-3.5 h-3.5" /> Best Value Plan
-                  </div>
-                )}
+          <div className="pt-2 flex items-center justify-center">
+            <Link
+              href="/auth"
+              className="py-4 px-8 rounded-2xl font-bold text-sm text-white bg-gradient-to-r from-[#0D9488] to-[#0F766E] shadow-md hover:shadow-lg hover:from-[#0F766E] hover:to-[#115E59] transition-all flex items-center gap-2"
+            >
+              <span>Get 500 Free Credits on Signup</span>
+              <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
 
-                <div className="space-y-6">
-                  <div>
-                    <h3 className="text-xl font-bold text-[#1C1917] font-['Plus_Jakarta_Sans']">{plan.name}</h3>
-                    <p className="text-xs text-[#78716C] mt-1 min-h-[36px]">{plan.desc}</p>
-                  </div>
-
-                  <div className="flex items-baseline gap-1 pt-2 border-t border-[#E6E0D6]/80">
-                    <span className="text-4xl font-extrabold text-[#1C1917] font-['Plus_Jakarta_Sans']">{price}</span>
-                    <span className="text-xs text-[#78716C] font-medium">/{plan.period}</span>
-                  </div>
-
-                  <div className="p-2.5 rounded-xl bg-[#FAF7F2] border border-[#E6E0D6] flex items-center justify-between text-xs font-semibold">
-                    <span className="text-[#78716C]">Credit Allowance:</span>
-                    <span className="text-[#0D9488] font-bold">{plan.credits}</span>
-                  </div>
-
-                  <div className="space-y-3 pt-2">
-                    <p className="text-xs font-bold uppercase tracking-wider text-[#A8A29E]">Included Features</p>
-                    {plan.features.map((feat, fIdx) => (
-                      <div key={fIdx} className="flex items-start gap-2 text-xs text-[#1C1917]">
-                        <Check className="w-4 h-4 text-[#0D9488] shrink-0 mt-0.5" />
-                        <span>{feat}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="pt-8">
-                  <Link
-                    href={plan.buttonHref}
-                    className={`w-full py-3.5 px-4 rounded-2xl font-bold text-sm text-center flex items-center justify-center gap-2 transition-all duration-200 ${
-                      plan.popular
-                        ? "bg-gradient-to-r from-[#0D9488] to-[#0F766E] text-white shadow-md hover:shadow-lg hover:from-[#0F766E] hover:to-[#115E59]"
-                        : "bg-[#FAF7F2] border border-[#E6E0D6] text-[#1C1917] hover:bg-[#F5EFE6]"
-                    }`}
-                  >
-                    <span>{plan.buttonText}</span>
-                    <ArrowRight className="w-4 h-4" />
-                  </Link>
-                </div>
-
-              </div>
-            );
-          })}
+          <div className="flex flex-wrap justify-center gap-6 text-xs text-[#78716C] pt-2">
+            <span className="flex items-center gap-1.5">
+              <CheckCircle2 className="w-4 h-4 text-[#0D9488]" /> 500 Credits on Signup
+            </span>
+            <span className="flex items-center gap-1.5">
+              <CheckCircle2 className="w-4 h-4 text-[#0D9488]" /> No credit card required
+            </span>
+            <span className="flex items-center gap-1.5">
+              <CheckCircle2 className="w-4 h-4 text-[#0D9488]" /> 1 ₹ = 10 Credits Rate
+            </span>
+          </div>
         </div>
 
       </div>

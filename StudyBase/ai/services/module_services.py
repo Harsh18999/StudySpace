@@ -11,7 +11,7 @@ from ai.models import ModuleQuizes, ModuleNotes, ModuleFlashcards, IndexVideos
 from spaces.models import Module, Resource
 from ai.services.schema import create_flashcard_model, create_quiz_model, Quiz, FlashcardSet
 from ai.services.dep import video_vector_store
-from ai.services.workflow import model
+from ai.services.workflow import generation_model
 from ai.services.prompts import quiz_generation_prompt, flashcard_generation_prompt
 
 from payments.utils import calculate_module_credit_cost

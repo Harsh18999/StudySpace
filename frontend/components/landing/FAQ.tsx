@@ -21,7 +21,7 @@ export function FAQ() {
     },
     {
       q: "What are credits and how do they work?",
-      a: "Credits power AI processing actions. Free accounts receive 500 monthly credits. Credits can be refilled at a rate of 1 ₹ = 10 Credits. AI Tutor Chat messages cost 1 credit per message, while generating Notes, MCQ Quizzes, or Flashcard decks cost 10 credits each."
+      a: "Credits power AI processing actions. Refill credits on-demand at a rate of 1 ₹ = 10 Base Credits. Processing video lectures (up to 2 hours duration) costs 50 credits, generating AI Notes costs 15 credits, MCQ Quizzes or Flashcard decks cost 10 credits, and AI Tutor Chat messages cost 1 credit per query."
     },
     {
       q: "Can I export my study materials to Microsoft Word?",

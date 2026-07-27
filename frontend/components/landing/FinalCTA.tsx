@@ -59,7 +59,7 @@ export function FinalCTA({ onOpenDemo }: FinalCTAProps) {
           {/* Micro Guarantee */}
           <div className="pt-2 flex flex-wrap justify-center gap-6 text-xs text-white/80">
             <span className="flex items-center gap-1.5">
-              <CheckCircle2 className="w-4 h-4 text-emerald-300" /> 500 Free Credits / Month
+              <CheckCircle2 className="w-4 h-4 text-emerald-300" /> 500 Free Credits on Signup
             </span>
             <span className="flex items-center gap-1.5">
               <CheckCircle2 className="w-4 h-4 text-emerald-300" /> 1 ₹ = 10 Credits Rate

@@ -74,6 +74,11 @@ class VideoResource(APIView):
         if not details:
             raise ValidationError("Didn't find any video with this id!")
 
+        duration = parse_duration(details["contentDetails"]["duration"])
+        total_seconds = duration.total_seconds() if hasattr(duration, 'total_seconds') else getattr(duration, 'seconds', 0)
+        if total_seconds > 7200:
+            raise ValidationError("Video duration exceeds the maximum limit of 2 hours (50 credits limit). Only videos up to 2 hours are allowed.")
+
         resource = Resource.objects.create(
             id=uuid.uuid4(),
             module=module
@@ -85,7 +90,7 @@ class VideoResource(APIView):
             title=details['snippet']['title'],
             channel_name=details['snippet']['channelTitle'],
             channel_id=details['snippet']['channelId'],
-            duration=parse_duration(details["contentDetails"]["duration"]),
+            duration=duration,
             description=details['snippet']['description'],
             published_at=details['snippet']['publishedAt'],
             thumbnail_url=details['snippet']['thumbnails']['high']['url']
@@ -115,23 +120,35 @@ class PlayListResource(APIView):
         if not content:
             raise ValidationError("Didn't find any videos in this playlist!")
         
-        # Explicit client-side UUID generation for bulk_create on SQLite/Postgres
-        resources = [Resource(id=uuid.uuid4(), module=module) for _ in content]
-        Resource.objects.bulk_create(resources, batch_size=1000)
-        
-        videos = []
-        for i, item in enumerate(content):
+        valid_items = []
+        for item in content:
             content_details = item.get('contentDetails', {})
             snippet = item.get('snippet', {})
-            thumbnails = snippet.get('thumbnails', {})
-            thumb = thumbnails.get('high') or thumbnails.get('medium') or thumbnails.get('default') or {}
-
-            duration_raw = content_details.get('duration')
-            duration = parse_duration(duration_raw) if duration_raw else parse_duration("PT0S")
-
             video_id = content_details.get('videoId') or snippet.get('resourceId', {}).get('videoId')
             if not video_id:
                 continue
+
+            duration_raw = content_details.get('duration')
+            duration = parse_duration(duration_raw) if duration_raw else parse_duration("PT0S")
+            total_seconds = duration.total_seconds() if hasattr(duration, 'total_seconds') else getattr(duration, 'seconds', 0)
+
+            # Restrict videos over 2 hours (7200 seconds)
+            if total_seconds > 7200:
+                continue
+
+            valid_items.append((item, video_id, duration))
+
+        if not valid_items:
+            raise ValidationError("No videos in this playlist are under the maximum duration limit of 2 hours.")
+
+        resources = [Resource(id=uuid.uuid4(), module=module) for _ in valid_items]
+        Resource.objects.bulk_create(resources, batch_size=1000)
+        
+        videos = []
+        for i, (item, video_id, duration) in enumerate(valid_items):
+            snippet = item.get('snippet', {})
+            thumbnails = snippet.get('thumbnails', {})
+            thumb = thumbnails.get('high') or thumbnails.get('medium') or thumbnails.get('default') or {}
 
             videos.append(
                 YoutubeVideo(

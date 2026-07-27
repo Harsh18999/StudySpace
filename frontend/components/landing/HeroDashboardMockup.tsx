@@ -38,7 +38,7 @@ export function HeroDashboardMockup() {
           </div>
           <div>
             <p className="text-xs font-bold text-[#1C1917]">AI Notes Generated</p>
-            <p className="text-[10px] text-[#78716C]">10 Credits Used • 12 Sections</p>
+            <p className="text-[10px] text-[#78716C]">15 Credits Used • 12 Sections</p>
           </div>
         </div>
 
@@ -263,7 +263,7 @@ export function HeroDashboardMockup() {
               <div className="p-4 rounded-2xl bg-white border border-[#E6E0D6] shadow-sm space-y-3 text-xs">
                 <div className="flex items-center justify-between border-b border-[#E6E0D6] pb-2">
                   <h3 className="font-bold text-[#1C1917]">Section 1: Supervised Learning Foundations</h3>
-                  <span className="text-[10px] text-[#0D9488] bg-[#0D9488]/10 px-2 py-0.5 rounded-full font-semibold">10 Credits Used</span>
+                  <span className="text-[10px] text-[#0D9488] bg-[#0D9488]/10 px-2 py-0.5 rounded-full font-semibold">15 Credits Used</span>
                 </div>
                 <div className="space-y-2 text-[#78716C] leading-relaxed">
                   <p className="font-semibold text-[#0D9488]">Key Takeaways:</p>
@@ -308,7 +308,7 @@ export function HeroDashboardMockup() {
               <div className="flex items-center gap-2">
                 <Coins className="w-4 h-4 text-[#0D9488]" />
                 <span className="font-bold text-[#1C1917]">Credit Rate:</span>
-                <span className="text-[#78716C]">1 ₹ = 10 Credits (500 free monthly credits)</span>
+                <span className="text-[#78716C]">1 ₹ = 10 Credits (500 credits on signup)</span>
               </div>
               <span className="font-bold text-[#0D9488]">Chat: 1 Cr • Asset: 10 Cr</span>
             </div>

@@ -32,7 +32,7 @@ export function Hero({ onOpenDemo }: HeroProps) {
             <span className="flex h-2 w-2 rounded-full bg-[#0D9488] animate-pulse" />
             <span>AI-Powered Learning Workspace 2.0</span>
             <span className="text-[#A8A29E]">|</span>
-            <span className="text-[#0D9488] font-bold">500 Free Credits / Mo</span>
+            <span className="text-[#0D9488] font-bold">500 Credits on Signup</span>
           </div>
         </div>
 

@@ -69,7 +69,7 @@ def fetch_content_timeline(start_time: float, end_time: float, config: RunnableC
         index_video = IndexVideos.objects.get(video_id=video_id)
         transcript = getattr(index_video, 'transcript', []) or []
 
-        for segment in transcript:
+        for segment in transcript[1:]:
             if segment['start_time'] >= start_time:
                 content += segment['text']
 

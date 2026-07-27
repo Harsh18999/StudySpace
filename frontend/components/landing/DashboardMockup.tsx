@@ -38,7 +38,7 @@ export function DashboardMockup() {
             </div>
             <div className="flex items-center gap-2 text-xs text-[#0D9488] font-semibold bg-[#0D9488]/10 px-2.5 py-0.5 rounded-full border border-[#0D9488]/20">
               <Coins className="w-3.5 h-3.5" />
-              <span>500 Free Credits / mo</span>
+              <span>500 Credits on Signup</span>
             </div>
           </div>
 
@@ -137,7 +137,7 @@ export function DashboardMockup() {
                 <div className="p-3 rounded-2xl bg-white border border-[#E6E0D6] shadow-sm space-y-1 text-xs">
                   <div className="flex justify-between items-center">
                     <span className="font-bold text-[#1C1917] flex items-center gap-1"><BookOpen className="w-3.5 h-3.5 text-[#0D9488]" /> AI Notes</span>
-                    <span className="text-[10px] text-[#0D9488]">10 Credits</span>
+                    <span className="text-[10px] text-[#0D9488] font-bold">15 Credits</span>
                   </div>
                   <p className="text-[11px] text-[#78716C] line-clamp-2">Structured notes with equations & key takeaways...</p>
                 </div>
@@ -172,7 +172,7 @@ export function DashboardMockup() {
                 <div className="flex items-center gap-2">
                   <Activity className="w-4 h-4 text-[#0D9488]" />
                   <span className="font-semibold text-[#1C1917]">Credit Pricing:</span>
-                  <span className="text-[#78716C]">1 ₹ = 10 Credits (500 free monthly credits)</span>
+                  <span className="text-[#78716C]">1 ₹ = 10 Credits (500 credits on signup)</span>
                 </div>
                 <span className="font-bold text-[#0D9488]">🔥 14-Day Streak</span>
               </div>
