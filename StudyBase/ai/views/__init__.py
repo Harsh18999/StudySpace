@@ -27,6 +27,7 @@ from .chat import (
     ChatVideoView,
     IndexedModuleResourcesView,
 )
+from .keep_alive import KeepAliveView
 
 __all__ = [
     'GenerateContent',
@@ -50,4 +51,5 @@ __all__ = [
     'StartResourceQuizAttemptView',
     'SaveResourceQuizAttemptView',
     'RetrieveResourceQuizAttemptView',
+    'KeepAliveView',
 ]

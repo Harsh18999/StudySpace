@@ -241,3 +241,13 @@ def run_module_workflow(self, job_id: str, module_id: str, resource_ids: list, i
 
     logger.info("[%s] Pushing result to DB: %s", job_id, list(result.keys()))
     _update_module_job(job_id, status="completed", message="All content generated", result=result)
+
+
+@shared_task(bind=True)
+def dummy_task(self, name: str = "keep_alive"):
+    """
+    Dummy Celery task for keep_alive endpoint.
+    """
+    logger.info("[dummy_task] Executing dummy task for name: %s", name)
+    return f"Dummy task completed successfully for {name}"
+
