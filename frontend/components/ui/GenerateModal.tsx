@@ -128,7 +128,7 @@ export function GenerateModal({ open, onClose, onSubmit, generating, contentType
 
                   {/* Credit Cost Badge */}
                   {(() => {
-                    const creditCost = contentType === 'notes' ? 15 : 10;
+                    const creditCost = contentType.toLowerCase() === 'notes' ? 15 : 10;
                     return (
                       <div className="p-3 bg-amber-50/90 border border-amber-200/80 rounded-xl flex items-center justify-between text-xs">
                         <div className="flex items-center gap-2 text-amber-900 font-bold">
