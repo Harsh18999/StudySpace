@@ -180,6 +180,8 @@ REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379")
 
 CELERY_BROKER_URL = REDIS_URL
 CELERY_RESULT_BACKEND = REDIS_URL
+CELERY_TASK_DEFAULT_QUEUE = os.getenv("CELERY_TASK_DEFAULT_QUEUE", "celery")
+CELERY_TASK_ALWAYS_EAGER = os.getenv("CELERY_TASK_ALWAYS_EAGER", "False").lower() in ("true", "1", "yes")
 
 CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TASK_SERIALIZER = "json"
@@ -210,6 +212,8 @@ EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER or 'noreply@studybase.ai'
 PROXY_USERNAME = os.getenv('PROXY_USERNAME', '')
 PROXY_PASSWORD = os.getenv('PROXY_PASSWORD', '')
+
+SUPADATA_API_KEY = os.getenv("SUPADATA_API_KEY")
 
 # CORS — allow Next.js dev server
 CORS_ALLOWED_ORIGINS = [

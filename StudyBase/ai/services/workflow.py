@@ -16,8 +16,6 @@ from .schema import *
 from .s3 import s3
 from .dep import splitter, video_vector_store, pdf_vector_store
 
-from youtube_transcript_api import FetchedTranscriptSnippet
-
 
 from tempfile import TemporaryDirectory
 import fitz

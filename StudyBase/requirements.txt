@@ -143,7 +143,7 @@ uuid_utils==0.15.0
 vine==5.1.0
 wcwidth==0.8.2
 xxhash==3.8.1
-youtube-transcript-api==1.2.4
+supadata
 zipp==3.23.1
 zope.interface==8.0.1
 zstandard==0.25.0
