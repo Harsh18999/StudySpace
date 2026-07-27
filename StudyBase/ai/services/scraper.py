@@ -3,9 +3,14 @@ import fitz
 from django.conf import settings
 from .s3 import s3
 
+proxy_config=WebshareProxyConfig(
+        proxy_username=settings.PROXY_USERNAME,
+        proxy_password=settings.PROXY_PASSWORD,
+    )
+
 def fetch_transcript(video_id: str):
     try:
-        api = YouTubeTranscriptApi()
+        api = YouTubeTranscriptApi(proxy=proxy_config)
         try:
             transcript = api.fetch(video_id, languages=['en', 'hi'])
         except Exception:
