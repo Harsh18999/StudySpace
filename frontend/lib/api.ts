@@ -1,7 +1,36 @@
 import axios from "axios";
 import type { GenerationInstruction } from "./types";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const rawApiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+const API_URL = rawApiUrl.trim().replace(/\/+$/, "");
+
+export function getApiErrorMessage(err: unknown, defaultMsg: string = "An error occurred"): string {
+  if (!err) return defaultMsg;
+  const errorObj = err as any;
+  if (errorObj.response && errorObj.response.data) {
+    const data = errorObj.response.data;
+    if (typeof data === "string") return data;
+    if (typeof data.detail === "string") return data.detail;
+    if (typeof data.error === "string") return data.error;
+    if (typeof data.message === "string") return data.message;
+    if (typeof data === "object") {
+      const keys = Object.keys(data);
+      if (keys.length > 0) {
+        const firstVal = data[keys[0]];
+        if (Array.isArray(firstVal) && firstVal.length > 0) {
+          return `${keys[0]}: ${firstVal[0]}`;
+        }
+        if (typeof firstVal === "string") {
+          return `${keys[0]}: ${firstVal}`;
+        }
+      }
+    }
+  }
+  if (errorObj.message && typeof errorObj.message === "string") {
+    return errorObj.message;
+  }
+  return defaultMsg;
+}
 
 const api = axios.create({
   baseURL: API_URL,

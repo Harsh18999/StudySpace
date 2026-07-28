@@ -7,7 +7,7 @@ import { z } from "zod";
 import { motion, AnimatePresence } from "framer-motion";
 import { Eye, EyeOff, Mail, Lock, User, Loader2, CheckCircle, ArrowLeft, KeyRound } from "lucide-react";
 import { useGoogleLogin } from "@react-oauth/google";
-import { authApi } from "@/lib/api";
+import { authApi, getApiErrorMessage } from "@/lib/api";
 import { useAuthStore } from "@/store/useStore";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/ui/Toast";
@@ -130,7 +130,8 @@ export function SignUpForm({ onSignIn }: Props) {
       addToast("Verification code sent to your email! 📧", "success");
     } catch (err: unknown) {
       setLoading(false);
-      const msg = (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail || "Failed to send verification code";
+      console.error("sendOtp error:", err);
+      const msg = getApiErrorMessage(err, "Failed to send verification code");
       addToast(msg, "error");
     }
   };
@@ -147,7 +148,8 @@ export function SignUpForm({ onSignIn }: Props) {
       addToast("New verification code sent! 📧", "success");
     } catch (err: unknown) {
       setLoading(false);
-      const msg = (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail || "Failed to resend code";
+      console.error("handleResendOtp error:", err);
+      const msg = getApiErrorMessage(err, "Failed to resend code");
       addToast(msg, "error");
     }
   };
@@ -178,7 +180,8 @@ export function SignUpForm({ onSignIn }: Props) {
       }, 400);
     } catch (err: unknown) {
       setLoading(false);
-      const msg = (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail || "Registration failed. Invalid code.";
+      console.error("register error:", err);
+      const msg = getApiErrorMessage(err, "Registration failed. Invalid code.");
       addToast(msg, "error");
     }
   };

@@ -7,7 +7,7 @@ import { z } from "zod";
 import { motion, AnimatePresence } from "framer-motion";
 import { Eye, EyeOff, Mail, Lock, Loader2, CheckCircle } from "lucide-react";
 import { useGoogleLogin } from "@react-oauth/google";
-import { authApi } from "@/lib/api";
+import { authApi, getApiErrorMessage } from "@/lib/api";
 import { useAuthStore } from "@/store/useStore";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/ui/Toast";
@@ -61,7 +61,8 @@ export function SignInForm({ onForgot, onSignUp }: Props) {
       }, 400);
     } catch (err: unknown) {
       setGoogleLoading(false);
-      const msg = (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail || "Google Sign-In failed";
+      console.error("Google login error:", err);
+      const msg = getApiErrorMessage(err, "Google Sign-In failed");
       addToast(msg, "error");
     }
   };
@@ -95,7 +96,8 @@ export function SignInForm({ onForgot, onSignUp }: Props) {
       setLoading(false);
       setShake(true);
       setTimeout(() => setShake(false), 600);
-      const msg = (err as { response?: { data?: { detail?: string } } })?.response?.data?.detail || "Invalid email or password";
+      console.error("login error:", err);
+      const msg = getApiErrorMessage(err, "Invalid email or password");
       addToast(msg, "error");
     }
   };
