@@ -25,8 +25,12 @@ class SendOTPView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
-        email = request.data.get("email", "").strip()
+        data = request.data if isinstance(request.data, dict) else {}
+        raw_email = data.get("email", "")
+        email = raw_email.strip().lower() if isinstance(raw_email, str) else ""
+
         if not email or "@" not in email:
+            print(f"❌ [SendOTPView 400] Missing or invalid email in request payload: '{raw_email}'")
             return Response(
                 {"detail": "Please enter a valid email address."},
                 status=status.HTTP_400_BAD_REQUEST
@@ -34,6 +38,7 @@ class SendOTPView(APIView):
 
         # Check if user with this email already exists
         if User.objects.filter(email__iexact=email).exists():
+            print(f"⚠️ [SendOTPView 400] Account already exists for email: '{email}'")
             return Response(
                 {"detail": "An account with this email address already exists. Please sign in."},
                 status=status.HTTP_400_BAD_REQUEST
