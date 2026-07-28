@@ -81,9 +81,9 @@ def process_node(state: dict):
     # Fetch summaries from vector store
 
     if resource.type == 'youtube' and hasattr(resource, 'youtube_video'):
-        summary = IndexVideos.get(video_id = resource.youtube_video.video_id).final_summary
+        summary = IndexVideos.objects.get(video_id = resource.youtube_video.video_id).final_summary
     elif resource.type == 'file':
-        summary = IndexPDFs.get(file = resource.pdf_file).final_summary
+        summary = IndexPDFs.objects.get(file = resource.pdf_file).final_summary
 
     if instruction.type == 'quize':
         response = model.with_structured_output(create_quiz_model(int(avg_count))).invoke(
