@@ -7,7 +7,7 @@ from langgraph.graph import StateGraph, END
 from langgraph.types import Send
 from langchain_core.documents import Document
 
-from ai.models import ModuleQuizes, ModuleNotes, ModuleFlashcards, IndexVideos
+from ai.models import ModuleQuizes, ModuleNotes, ModuleFlashcards, IndexVideos, IndexPDFs
 from spaces.models import Module, Resource
 from ai.services.schema import create_flashcard_model, create_quiz_model, Quiz, FlashcardSet
 from ai.services.dep import video_vector_store
@@ -79,20 +79,11 @@ def process_node(state: dict):
     avg_count = state['avg_count']
 
     # Fetch summaries from vector store
-    where_filter: dict = {"content_type": "summaries"}
 
     if resource.type == 'youtube' and hasattr(resource, 'youtube_video'):
-        where_filter["video_id"] = resource.youtube_video.video_id
-        where_filter["type"] = "youtube"
+        summary = IndexVideos.get(video_id = resource.youtube_video.video_id).final_summary
     elif resource.type == 'file':
-        where_filter["type"] = "pdf"
-
-    result = video_vector_store.get(
-        ids=None,
-        where=where_filter,
-    )
-    docs = [Document(page_content=text) for text in result.get("documents", [])]
-    summary = '\n\n'.join([doc.page_content for doc in docs])
+        summary = IndexPDFs.get(file = resource.pdf_file).final_summary
 
     if instruction.type == 'quize':
         response = model.with_structured_output(create_quiz_model(int(avg_count))).invoke(
