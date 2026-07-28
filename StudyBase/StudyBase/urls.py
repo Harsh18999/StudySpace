@@ -15,7 +15,13 @@ from accounts.views import LoginView, RegisterView, SendOTPView, GoogleAuthView,
 from ai.views import KeepAliveView
 from spaces.urls import urlpatterns as spaces_urlpatterns
 
+from django.http import JsonResponse
+
+def root_health_check(request):
+    return JsonResponse({"status": "ok", "message": "StudySpace API Backend Service is Running"})
+
 urlpatterns = [
+    path('', root_health_check, name='root_health_check'),
     path('admin/', admin.site.urls),
     path('keep_alive/', KeepAliveView.as_view(), name='root_keep_alive'),
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
